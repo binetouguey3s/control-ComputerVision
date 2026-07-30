@@ -7,11 +7,9 @@ Hugging Face (ResNet-50) et retourne un diagnostic qualité : **conforme** ou **
 
 ```bash
 # 1. Cloner le dépôt
-git clone 
+git clone https://github.com/binetouguey3s/control-ComputerVision.git
 cd atelier35-control-ComputerVision
 
-# 2. Copier et renseigner les variables d'environnement
-cp .env.example .env
 # Éditez .env et renseignez votre HF_TOKEN si nécessaire
 
 # 3. Installer les dépendances
@@ -75,8 +73,6 @@ curl -X POST http://127.0.0.1:8000/inspect-image \
 
 Le champ `status` vaut `"conforme"` si le score de confiance est ≥ 0.70, sinon `"defaut"`.
 
----
-
 ## Contraintes de validation
 
 | Règle                  | Valeur              |
@@ -84,11 +80,10 @@ Le champ `status` vaut `"conforme"` si le score de confiance est ≥ 0.70, sinon
 | Formats acceptés       | JPEG, PNG, WebP     |
 | Taille maximale        | 5 Mo                |
 
----
 
 ## Structure du projet
 
-```
+
 atelier35-control-ComputerVision/
 ├── main.py                 # Code source de l'API FastAPI
 ├── pyproject.toml          # Dépendances du projet (uv)
@@ -96,11 +91,7 @@ atelier35-control-ComputerVision/
 ├── .env                    # Variables d'environnement locales (non versionné)
 ├── models_evaluation.md    # Comparaison des modèles candidats
 └── README.md               # Ce fichier
-```
-
----
 
 ## Choix du modèle
 
-Voir [`models_evaluation.md`](./models_evaluation.md) pour la comparaison détaillée des deux modèles
-candidats et la justification du choix final.
+Voir models_evaluation.md pour la comparaison détaillée des deux modèles candidats et la justification du choix final.

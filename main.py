@@ -5,18 +5,18 @@ from PIL import Image
 import torch
 from transformers import AutoImageProcessor, ResNetForImageClassification
 
-# ─── Variables d'environnement ────────────────────────────────────────────────
+# Variables d'environnement 
 MODEL_NAME = os.getenv("MODEL_NAME", "microsoft/resnet-50")
 HF_TOKEN   = os.getenv("HF_TOKEN", None)
 
-# ─── Initialisation de l'application ─────────────────────────────────────────
+# Initialisation de l'application 
 app = FastAPI(
     title="Atelier 35 - Contrôle Qualité Vision",
     description="Micro-service d'analyse d'images de produits via ResNet-50 pour la détection de défauts.",
     version="1.0.0",
 )
 
-# ─── Chargement du modèle au démarrage (une seule fois en mémoire) ────────────
+# Chargement du modèle au démarrage (une seule fois en mémoire) 
 print(f"Chargement du modèle : {MODEL_NAME}")
 try:
     model = ResNetForImageClassification.from_pretrained(
@@ -30,15 +30,13 @@ except Exception as e:
     print(f"Erreur au chargement du modèle : {e}")
     raise RuntimeError(f"Impossible de charger le modèle '{MODEL_NAME}' : {e}")
 
-# ─── Constantes de validation ─────────────────────────────────────────────────
+# Constantes de validation 
 MAX_FILE_SIZE      = 5 * 1024 * 1024  # 5 Mo
 ALLOWED_MIME_TYPES = {"image/jpeg", "image/png", "image/jpg", "image/webp"}
 
 # Mots-clés ImageNet qui indiquent une anomalie / défaut potentiel.
-# ResNet-50 est entraîné sur ImageNet (1000 classes génériques) et non sur des
-# défauts industriels. On utilise donc un seuil de confiance bas comme proxy :
-# si le modèle n'est pas sûr (confidence < seuil), on considère le produit
-# comme potentiellement défectueux.
+# ResNet-50 est entraîné sur ImageNet (1000 classes génériques) et non sur des défauts industriels. On utilise donc un seuil de confiance bas comme proxy :
+# si le modèle n'est pas sûr (confidence < seuil), on considère le produit comme potentiellement défectueux.
 CONFIDENCE_THRESHOLD = 0.70
 
 
@@ -52,7 +50,7 @@ def interpret_prediction(label: str, confidence: float) -> str:
     return "defaut"
 
 
-# ─── Endpoint principal ───────────────────────────────────────────────────────
+#  Endpoint principal
 @app.post(
     "/inspect-image",
     status_code=status.HTTP_200_OK,
