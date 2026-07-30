@@ -19,13 +19,13 @@ app = FastAPI(
 # Chargement du modèle au démarrage (une seule fois en mémoire) 
 print(f"Chargement du modèle : {MODEL_NAME}")
 try:
-    model = ResNetForImageClassification.from_pretrained(
+    model = ResNetForImageClassification.from_pretrained(  # ResNetForImageClassification est utilisé pour la classification d'images et from_pretrained charge le modèle pré-entraîné depuis Hugging Face.
         MODEL_NAME,
         token=HF_TOKEN,
-        ignore_mismatched_sizes=True,
+        ignore_mismatched_sizes=True, # permet de charger le modèle même si la taille des poids ne correspond pas exactement à celle attendue par la classe ResNetForImageClassification. Cela peut se produire si le modèle a été modifié ou si une version différente est utilisée.
     )
-    processor = AutoImageProcessor.from_pretrained(MODEL_NAME, token=HF_TOKEN)
-    model.eval()
+    processor = AutoImageProcessor.from_pretrained(MODEL_NAME, token=HF_TOKEN) # AutoImageProcessor est utilisé pour prétraiter les images avant de les passer au modèle. Il adapte automatiquement le prétraitement en fonction du modèle chargé.
+    model.eval() # met le modèle en mode évaluation (inférence) plutôt qu'en mode entraînement. Cela désactive certaines fonctionnalités comme le dropout et la normalisation par lot, qui ne sont pas nécessaires lors de l'inférence.
 except Exception as e:
     print(f"Erreur au chargement du modèle : {e}")
     raise RuntimeError(f"Impossible de charger le modèle '{MODEL_NAME}' : {e}")
@@ -39,7 +39,7 @@ ALLOWED_MIME_TYPES = {"image/jpeg", "image/png", "image/jpg", "image/webp"}
 # si le modèle n'est pas sûr (confidence < seuil), on considère le produit comme potentiellement défectueux.
 CONFIDENCE_THRESHOLD = 0.70
 
-
+# Fonction utilitaire pour interpréter la prédiction
 def interpret_prediction(label: str, confidence: float) -> str:
     """
     Traduit la prédiction ImageNet en diagnostic qualité.
@@ -57,7 +57,8 @@ def interpret_prediction(label: str, confidence: float) -> str:
     summary="Inspecter une image de produit",
     response_description="Diagnostic qualité : conforme ou défaut",
 )
-async def inspect_image(file: UploadFile = File(...)):
+# sert à charger le modèle en mémoire
+async def inspect_image(file: UploadFile = File(...)): 
     """
     Reçoit une image de pièce industrielle en multipart/form-data.
     Retourne un diagnostic structuré JSON avec le statut et le score de confiance.
@@ -80,7 +81,7 @@ async def inspect_image(file: UploadFile = File(...)):
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail=(
-                f"Fichier trop lourd ({len(image_bytes) / (1024 * 1024):.2f} Mo). "
+                f"Fichier trop lourd ({len(image_bytes) / (1024 * 1024):.2f} Mo). " 
                 "Limite : 5 Mo."
             ),
         )
@@ -94,7 +95,7 @@ async def inspect_image(file: UploadFile = File(...)):
             detail="Le fichier est corrompu ou n'est pas une image valide.",
         )
 
-    # ─── Inférence ────────────────────────────────────────────────────────────
+    # Inférence 
     try:
         inputs = processor(image, return_tensors="pt")
 
@@ -102,11 +103,11 @@ async def inspect_image(file: UploadFile = File(...)):
             logits = model(**inputs).logits  # shape [1, num_classes]
 
         # Classe la plus probable
-        predicted_idx   = logits.argmax(-1).item()
+        predicted_idx   = logits.argmax(-1).item() 
         probabilities   = torch.nn.functional.softmax(logits, dim=-1)
-        confidence      = round(probabilities[0][predicted_idx].item(), 4)
-        predicted_label = model.config.id2label[predicted_idx]
-        diagnostic      = interpret_prediction(predicted_label, confidence)
+        confidence      = round(probabilities[0][predicted_idx].item(), 4) # sert à afficher le score de confiance
+        predicted_label = model.config.id2label[predicted_idx] # sert à afficher le nom de la classe
+        diagnostic      = interpret_prediction(predicted_label, confidence) # sert à afficher le statut
 
         return {
             "status":     diagnostic,          # "conforme" ou "defaut"

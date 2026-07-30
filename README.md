@@ -34,7 +34,7 @@ La documentation interactive est disponible sur `http://127.0.0.1:8000/docs`.
 | Variable     | Description                                      | Défaut                  |
 |--------------|--------------------------------------------------|-------------------------|
 | `MODEL_NAME` | Identifiant du modèle Hugging Face à utiliser    | `microsoft/resnet-50`   |
-| `HF_TOKEN`   | Token d'accès Hugging Face (modèles privés/gated) | *(optionnel)*           |
+| `HF_TOKEN`   | Token d'accès Hugging Face (modèles privés)      | *(optionnel)*           |
 
 Voir `.env.example` pour un modèle de configuration.
 
@@ -53,7 +53,7 @@ Envoie une image de produit et reçoit un diagnostic qualité.
 | `file` | fichier | Image au format JPEG, PNG ou WebP  |
 
 **Exemple avec curl**
-
+ 
 ```bash
 curl -X POST http://127.0.0.1:8000/inspect-image \
   -F "file=@photo_produit.jpg"
