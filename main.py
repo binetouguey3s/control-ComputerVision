@@ -105,7 +105,7 @@ async def inspect_image(file: UploadFile = File(...)):
         # Classe la plus probable
         predicted_idx   = logits.argmax(-1).item() 
         probabilities   = torch.nn.functional.softmax(logits, dim=-1)
-        confidence      = round(probabilities[0][predicted_idx].item(), 4) # sert à afficher le score de confiance
+        confidence      = round(probabilities[0][predicted_idx].item(), 4) # sert à afficher le score de confiance 
         predicted_label = model.config.id2label[predicted_idx] # sert à afficher le nom de la classe
         diagnostic      = interpret_prediction(predicted_label, confidence) # sert à afficher le statut
 
