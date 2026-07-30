@@ -88,19 +88,19 @@ async def inspect_image(file: UploadFile = File(...)):
 
     # Validation 3 : image valide (Pillow)
     try:
-        image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+        image = Image.open(io.BytesIO(image_bytes)).convert("RGB") # convertir en format RGB pour que le modèle puisse traiter les images , io.BytesIO est utilisé pour passer le fichier en mémoire
     except Exception:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, 
             detail="Le fichier est corrompu ou n'est pas une image valide.",
         )
 
     # Inférence 
     try:
-        inputs = processor(image, return_tensors="pt")
+        inputs = processor(image, return_tensors="pt") # prétraitement des images avant de les passer au modèle
 
-        with torch.no_grad():
-            logits = model(**inputs).logits  # shape [1, num_classes]
+        with torch.no_grad(): # empêche le modèle de modifier les poids
+            logits = model(**inputs).logits  # shape [1, num_classes] , num_classes est le nombre de classes du modèle
 
         # Classe la plus probable
         predicted_idx   = logits.argmax(-1).item() 
@@ -119,6 +119,6 @@ async def inspect_image(file: UploadFile = File(...)):
 
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
             detail=f"Erreur durant l'analyse : {str(e)}",
         )
